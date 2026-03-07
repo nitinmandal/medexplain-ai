@@ -1,0 +1,9 @@
+Blood Test Report
+Name: John Doe
+Date: 2026-03-07
+
+Test Name        Result    Normal Range
+Hemoglobin       14.2      13.5 - 17.5 g/dL
+Glucose Fasting  95        70 - 100 mg/dL
+TSH              5.5       0.4 - 4.0 mIU/L
+Cholesterol      220       < 200 mg/dL
