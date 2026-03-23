@@ -129,8 +129,6 @@ app.post('/api/analyze', protect, apiLimiter, upload.single('report'), async (re
         let languageInstruction = 'You MUST generate the entire analysis and all text fields in English.';
         if (userLanguage === 'hi') {
             languageInstruction = 'You MUST generate the entire analysis and all text fields (summary, highlights, recommendations, explanations) in Hindi (हिन्दी) language. Do not mix English words unless they are untranslatable medical terms.';
-        } else if (userLanguage === 'hinglish') {
-            languageInstruction = 'You MUST generate the entire analysis and all text fields (summary, highlights, recommendations, explanations) in Hinglish (Hindi written in the English alphabet/Roman script). For example: "Aapka health acha hai, lekin cholesterol thoda zyada hai."';
         }
 
         const prompt = `You are an expert medical analyst, but you are speaking directly to a patient with NO medical background. Analyze this medical lab test report. 
