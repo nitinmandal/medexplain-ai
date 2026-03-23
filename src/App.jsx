@@ -3,10 +3,13 @@ import Navbar from './components/Navbar'
 import LandingPage from './pages/LandingPage'
 import UploadPage from './pages/UploadPage'
 import DashboardPage from './pages/DashboardPage'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
 import AboutPage from './pages/AboutPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import DisclaimerPage from './pages/DisclaimerPage'
 import Footer from './components/Footer'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
     return (
@@ -16,11 +19,17 @@ function App() {
                 <main className="main-content">
                     <Routes>
                         <Route path="/" element={<LandingPage />} />
-                        <Route path="/upload" element={<UploadPage />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/disclaimer" element={<DisclaimerPage />} />
+                        
+                        {/* Protected Routes */}
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/upload" element={<UploadPage />} />
+                            <Route path="/dashboard" element={<DashboardPage />} />
+                        </Route>
                     </Routes>
                 </main>
                 <Footer />

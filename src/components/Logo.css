@@ -1,0 +1,75 @@
+.medexplain-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+.medexplain-logo:hover {
+    transform: scale(1.02);
+}
+
+.image-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* White logo on dark navbar */
+}
+
+.logo-large .custom-logo-img {
+    height: 64px;
+    filter: none; /* Normal on light backgrounds */
+}
+
+.logo-text-wrapper {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.3px;
+}
+
+.logo-large .logo-text-wrapper {
+    font-size: 1.6rem;
+}
+
+.logo-med {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.logo-explain {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin-right: 0.35rem;
+}
+
+.logo-large .logo-med {
+    color: var(--primary-color);
+}
+
+.logo-large .logo-explain {
+    color: var(--text-light);
+    margin-right: 0.4rem;
+}
+
+.logo-ai-badge {
+    background: transparent;
+    color: var(--accent-color);
+    -webkit-text-fill-color: initial;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.2px;
+}
+
+.logo-large .logo-ai-badge {
+    font-size: 1.5rem;
+}

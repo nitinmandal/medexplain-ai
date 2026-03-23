@@ -1,18 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, File, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import './UploadPage.css';
 
-const MOCK_EXTRACTED_DATA = [
-    { testName: 'Hemoglobin', value: 10, unit: 'g/dL', normalRange: '12 - 16 g/dL', status: 'Low', explanation: 'Hemoglobin is lower than the normal range and may indicate anemia.', recommendation: 'Consult a healthcare professional if symptoms such as fatigue or weakness are present.' },
-    { testName: 'Glucose (Fasting)', value: 85, unit: 'mg/dL', normalRange: '70 - 100 mg/dL', status: 'Normal', explanation: 'Your fasting glucose level is within the healthy range.', recommendation: 'Maintain a balanced diet and regular exercise routine.' },
-    { testName: 'Creatinine', value: 0.9, unit: 'mg/dL', normalRange: '0.6 - 1.2 mg/dL', status: 'Normal', explanation: 'Creatinine is normal, indicating healthy kidney function.', recommendation: 'Stay hydrated and maintain a healthy lifestyle.' },
-    { testName: 'Cholesterol', value: 240, unit: 'mg/dL', normalRange: 'Less than 200 mg/dL', status: 'High', explanation: 'Total cholesterol is elevated above the recommended healthy limit.', recommendation: 'Consider dietary changes, reducing saturated fats, and regular cardiovascular exercise. Speak with your doctor.' },
-    { testName: 'Platelets', value: 250000, unit: 'per microliter', normalRange: '150000 - 450000 per mcL', status: 'Normal', explanation: 'Platelet count is normal, suggesting healthy blood clotting capability.', recommendation: 'Continue routine check-ups.' },
-    { testName: 'TSH', value: 6.5, unit: 'mIU/L', normalRange: '0.4 - 4.0 mIU/L', status: 'High', explanation: 'Thyroid Stimulating Hormone is elevated, which may suggest an underactive thyroid (hypothyroidism).', recommendation: 'Schedule an appointment with an endocrinologist or primary care physician for further thyroid function testing.' },
-];
-
 const UploadPage = () => {
+    const { t, i18n } = useTranslation();
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -66,23 +59,45 @@ const UploadPage = () => {
         try {
             const formData = new FormData();
             formData.append('report', file);
+            formData.append('language', i18n.language);
+
+            const token = localStorage.getItem('medexplain_token');
+            if (!token) {
+                setError('You must be logged in to analyze reports.');
+                setTimeout(() => navigate('/login'), 2000);
+                setIsAnalyzing(false);
+                return;
+            }
 
             const response = await fetch('http://localhost:5001/api/analyze', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData,
             });
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('medexplain_token');
+                localStorage.removeItem('medexplain_user');
+                window.dispatchEvent(new Event('user-auth-change'));
+                throw new Error('Session expired or unauthorized. Please log in again.');
+            } else if (response.status === 429) {
+                throw new Error('Rate limit exceeded. Please try again later.');
+            } else if (!response.ok) {
                 throw new Error(data.error || 'Failed to analyze report.');
             }
 
             setIsAnalyzing(false);
-            navigate('/dashboard', { state: { results: data } });
+            navigate('/dashboard', { state: { results: data, id: new Date().toISOString() } });
         } catch (err) {
             setIsAnalyzing(false);
             setError(err.message || 'Error connecting to the AI server.');
+            if (err.message.includes('Session')) {
+                setTimeout(() => navigate('/login'), 2000);
+            }
         }
     };
 
@@ -91,8 +106,8 @@ const UploadPage = () => {
             <div className="container">
                 <div className="upload-container">
                     <div className="upload-header">
-                        <h1 className="upload-title">Analysis Center</h1>
-                        <p className="upload-subtitle">Upload your medical report for instant AI analysis.</p>
+                        <h1 className="upload-title">{t('upload.title')}</h1>
+                        <p className="upload-subtitle">{t('upload.subtitle')}</p>
                     </div>
 
                     <div
@@ -121,9 +136,9 @@ const UploadPage = () => {
                         ) : (
                             <div className="upload-prompt">
                                 <UploadCloud className="upload-icon" />
-                                <h3>Drag & drop your report here</h3>
-                                <p>or click to browse from your device</p>
-                                <div className="upload-formats">Supported formats: PDF, JPG, PNG (Max 10MB)</div>
+                                <h3>{t('upload.drag_drop')}</h3>
+                                <p>{t('upload.browse')}</p>
+                                <div className="upload-formats">{t('upload.supported')}</div>
                             </div>
                         )}
                     </div>
@@ -144,21 +159,27 @@ const UploadPage = () => {
                             }}
                             disabled={!file || isAnalyzing}
                         >
-                            {isAnalyzing ? 'Analyzing...' : 'Analyze Report'}
+                            {isAnalyzing ? t('upload.analyzing') : t('upload.analyze_btn')}
                         </button>
                     </div>
 
                     {isAnalyzing && (
                         <div className="analysis-loading">
-                            <div className="spinner"></div>
-                            <p>Analyzing your medical report...</p>
-                            <p className="loading-subtext">Our AI securely extracts and interprets your lab values.</p>
+                            <div className="scanner-container">
+                                <div className="scanner-document">
+                                    <div className="scanner-line"></div>
+                                </div>
+                            </div>
+                            <p className="loading-title">{t('upload.ai_analyzing')}</p>
+                            <div className="loading-steps">
+                                <span className="typing-text">{t('upload.extracting')}</span>
+                            </div>
                         </div>
                     )}
 
                     <div className="security-notice">
                         <AlertCircle size={14} />
-                        <span>Your files are securely processed and automatically deleted immediately after analysis. We ensure complete privacy.</span>
+                        <span>{t('upload.security')}</span>
                     </div>
                 </div>
             </div>

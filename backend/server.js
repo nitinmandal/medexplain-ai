@@ -5,12 +5,95 @@ import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import path from 'path';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import dns from 'dns';
+import User from './models/User.js';
 
 dotenv.config();
 
+// Override default broken local DNS resolution specifically for environments where 127.0.0.1 drops SRV connections
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+    family: 4 // Force IPv4 to prevent Node 17+ localhost/DNS resolution errors
+}).then(() => {
+    console.log('✅ Connected to MongoDB');
+}).catch(err => {
+    console.error('❌ Failed to connect to MongoDB', err);
+});
+
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// --- 3. Strict CORS Configuration ---
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:3000', 'http://localhost:5173'];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (e.g., mobile apps, curl) or explicitly allowed origins
+        if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Origin not allowed by CORS policy'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    optionsSuccessStatus: 200
+}));
+
+app.use(helmet());
+app.use(express.json({ limit: '1mb' }));
+
+// --- 1. Rate Limiting Configurations ---
+const apiLimiter = rateLimit({
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), // Default: 1 minute
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // Default: 100 requests per window
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+const authLimiter = rateLimit({
+    windowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '300000'), // Default: 5 minutes
+    max: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '20'), // Default: 20 failed attempts
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many authentication attempts, please try again later.' }
+});
+
+// --- 2. Authentication & Authorization Middleware ---
+const protect = async (req, res, next) => {
+    let token;
+
+    // Check if token exists in Authorization header
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1];
+
+            // Verify JWT token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            // Add user info to request (needed for user-based rate limiting & controllers)
+            req.user = { id: decoded.id };
+
+            next();
+        } catch (error) {
+            console.error('Auth middleware error:', error.message);
+            return res.status(401).json({ error: 'Not authorized, invalid or expired token' });
+        }
+    } else {
+        return res.status(401).json({ error: 'Not authorized, missing token' });
+    }
+};
 
 // Set up Multer for handling file uploads (temporarily stores them in 'uploads' folder)
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -22,7 +105,7 @@ const upload = multer({ dest: 'uploads/' });
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-app.post('/api/analyze', upload.single('report'), async (req, res) => {
+app.post('/api/analyze', protect, apiLimiter, upload.single('report'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
@@ -35,31 +118,62 @@ app.post('/api/analyze', upload.single('report'), async (req, res) => {
 
         // Read the file into Base64 for the API
         const fileData = fs.readFileSync(req.file.path);
+
         const base64Data = Buffer.from(fileData).toString('base64');
         const mimeType = req.file.mimetype;
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-        const prompt = `You are an expert medical analyst. Analyze this medical lab test report (it could be an image or a PDF).
-Extract all the blood test and lab test results you can find. 
-For each parameter, extract the test name, reported value, unit, and the normal reference range (either from the text or from your medical knowledge).
-Then, provide a simple 'explanation' of what this parameter means for a non-medical person.
-Then, provide a simple 'recommendation'.
+        const userLanguage = req.body.language || 'en';
+        let languageInstruction = 'You MUST generate the entire analysis and all text fields in English.';
+        if (userLanguage === 'hi') {
+            languageInstruction = 'You MUST generate the entire analysis and all text fields (summary, highlights, recommendations, explanations) in Hindi (हिन्दी) language. Do not mix English words unless they are untranslatable medical terms.';
+        } else if (userLanguage === 'hinglish') {
+            languageInstruction = 'You MUST generate the entire analysis and all text fields (summary, highlights, recommendations, explanations) in Hinglish (Hindi written in the English alphabet/Roman script). For example: "Aapka health acha hai, lekin cholesterol thoda zyada hai."';
+        }
+
+        const prompt = `You are an expert medical analyst, but you are speaking directly to a patient with NO medical background. Analyze this medical lab test report. 
+${languageInstruction}
+
+First, find and extract the date the test was conducted (the report date). Format it as YYYY-MM-DD.
+Then, provide a clear 2-3 sentence 'summary' of the patient's overall health. You MUST write this at a 6th-grade reading level. Use short sentences and everyday words. Avoid heavy medical terminology completely.
+Then, provide a 'quickHighlights' array containing 3-4 very short summary points so the user understands their report in 5-10 seconds.
+Then, provide a 'recommendations' array of 3-4 specific, actionable next steps.
+Then, provide a 'riskScore' between 1 and 100 representing how urgent it is to see a doctor (1 = perfectly healthy/no urgency, 100 = critical emergency).
+Then, provide a 'riskLevel' choosing EXACTLY ONE of: "Low", "Moderate", "High", or "Critical".
+Then, extract all the blood test and lab test results you can find. 
+For each parameter, extract the test name, reported value, unit, and the normal reference range.
+Then, provide a VERY short, simple 'explanation' of what this parameter means designed for a small info tooltip.
 You MUST classify the status as EXACTLY ONE of these: "Normal", "Low", "High", or "Critical".
 
-Please Output ONLY a valid JSON array of objects without any markdown formatting wrappers (like \`\`\`json).
+Please Output ONLY a valid JSON object without any markdown formatting wrappers (like \`\`\`json).
 Example structure:
-[
-  {
-    "testName": "Hemoglobin",
-    "value": "13.5",
-    "unit": "g/dL",
-    "normalRange": "12.0 - 15.5 g/dL",
-    "status": "Normal",
-    "explanation": "Hemoglobin is the protein in red blood cells that carries oxygen.",
-    "recommendation": "Maintain a healthy iron-rich diet."
-  }
-]`;
+{
+  "reportDate": "2023-10-25",
+  "summary": "Your overall health looks good. However, your cholesterol is slightly high and your thyroid is a bit underactive.",
+  "quickHighlights": [
+    "Cholesterol slightly high",
+    "Thyroid slightly underactive",
+    "Other values are normal"
+  ],
+  "recommendations": [
+    "Eat more leafy greens and balanced diet",
+    "Exercise regularly",
+    "Speak with your doctor to discuss your cholesterol and thyroid levels"
+  ],
+  "riskScore": 45,
+  "riskLevel": "Moderate",
+  "results": [
+    {
+      "testName": "Hemoglobin",
+      "value": "13.5",
+      "unit": "g/dL",
+      "normalRange": "12.0 - 15.5 g/dL",
+      "status": "Normal",
+      "explanation": "Hemoglobin is a protein in your blood that carries oxygen throughout the body."
+    }
+  ]
+}`;
 
         // Process the file using Gemini 1.5 Flash
         const result = await model.generateContent([
@@ -93,6 +207,167 @@ Example structure:
             fs.unlinkSync(req.file.path);
         }
         res.status(500).json({ error: error.message || 'An error occurred during analysis.' });
+    }
+});
+
+app.post('/api/analyze-trend', protect, apiLimiter, async (req, res) => {
+    try {
+        const { testName, history } = req.body;
+
+        if (!testName || !history || !Array.isArray(history)) {
+            return res.status(400).json({ error: 'Valid testName and history array are required.' });
+        }
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        const prompt = `You are an expert medical AI analyst, speaking to a user with NO medical background. I am providing you with a user's health history for a specific lab test.
+Test Name: ${testName}
+Historical Data:
+${history.map(entry => `- Date: ${entry.date}, Value: ${entry.value} ${entry.unit || ''} (Normal Range: ${entry.normalRange || 'N/A'})`).join('\n')}
+
+Based on this trend over time, analyze the data. Provide exactly one JSON object as output with no markdown wrappers.
+Include:
+1. "insight": A very simple, friendly 1-2 sentence explanation of the trend written at a 6th-grade reading level. Do not use medical jargon. (e.g., "Your blood sugar levels have been slowly going up over the past 6 months.").
+2. "prediction": If the trend indicates a potential health risk, gently generate a prediction/warning in simple terms. If healthy, provide a simple positive affirmation here. Keep it short and easy to understand.
+3. "status": Exactly one of ["Healthy", "Warning", "Risk"].
+
+Output format:
+{
+  "insight": "...",
+  "prediction": "...",
+  "status": "Healthy"
+}`;
+
+        const result = await model.generateContent(prompt);
+        let outputText = result.response.text();
+        outputText = outputText.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        try {
+            const parsedData = JSON.parse(outputText);
+            res.json(parsedData);
+        } catch (parseError) {
+            console.error('Failed to parse trend AI output:', outputText);
+            res.status(500).json({ error: 'AI output could not be formatted properly.' });
+        }
+
+    } catch (error) {
+        console.error('Error in /api/analyze-trend:', error);
+        res.status(500).json({ error: 'An error occurred during trend analysis.' });
+    }
+});
+
+app.post('/api/chat', protect, apiLimiter, async (req, res) => {
+    try {
+        const { question, context } = req.body;
+
+        if (!question || !context) {
+            return res.status(400).json({ error: 'Question and context are required.' });
+        }
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        const prompt = `You are a friendly, empathetic AI Health Assistant. You are chatting with a patient about their recent medical report.
+Context from the user's report:
+${JSON.stringify(context, null, 2)}
+
+User's Question: "${question}"
+
+Please answer the user's question based strictly on their report context provided above and general medical knowledge. 
+Keep your answer very simple (6th-grade reading level), short (2-4 sentences max), and easy to understand. Do not use complex medical jargon.
+Always remind the user to consult a doctor for a definitive diagnosis if they seem worried.`;
+
+        const result = await model.generateContent(prompt);
+        let answer = result.response.text().trim();
+
+        res.json({ answer });
+    } catch (error) {
+        console.error('Error in /api/chat:', error);
+        res.status(500).json({ error: 'Failed to generate an answer. Please try again.' });
+    }
+});
+
+// Auth Routes
+
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Basic validation
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: 'Please enter all fields' });
+        }
+
+        // Check for existing user
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'User already exists' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create user
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword
+        });
+
+        const savedUser = await newUser.save();
+
+        // Create token
+        const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        res.status(201).json({
+            token,
+            user: {
+                id: savedUser._id,
+                name: savedUser.name,
+                email: savedUser.email
+            }
+        });
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ error: 'Failed to create account.' });
+    }
+});
+
+app.post('/api/auth/login', authLimiter, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Basic validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Please enter all fields' });
+        }
+
+        // Check for user
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        // Validate password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        // Create token
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        res.json({
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Failed to log in.' });
     }
 });
 

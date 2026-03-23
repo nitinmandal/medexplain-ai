@@ -10,24 +10,27 @@
 
 .page-title {
     font-size: 3rem;
-    font-weight: 800;
-    color: var(--primary-dark);
+    font-weight: 700;
+    color: var(--primary-color);
     margin-bottom: 1rem;
+    letter-spacing: -0.02em;
 }
 
 .page-subtitle {
     font-size: 1.25rem;
-    color: var(--text-light);
+    color: var(--text-muted);
 }
 
 .mission-card {
     background-color: var(--primary-color);
     color: white;
     padding: 4rem 3rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-2xl);
     text-align: center;
     margin-bottom: 4rem;
-    box-shadow: 0 10px 15px -3px rgba(13, 71, 161, 0.3);
+    box-shadow: var(--card-shadow-xl);
+    position: relative;
+    overflow: hidden;
 }
 
 .mission-icon {
@@ -38,11 +41,12 @@
 }
 
 .mission-card h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     margin-bottom: 1.5rem;
-    opacity: 0.9;
+    opacity: 0.7;
+    font-weight: 600;
 }
 
 .mission-text {
@@ -57,26 +61,28 @@
 .about-content {
     display: flex;
     justify-content: space-between;
-    gap: 4rem;
+    gap: 3rem;
 }
 
 .about-text-section {
     flex: 2;
     background: white;
     padding: 3rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-xl);
     box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
 }
 
-.section-heading {
+.about-text-section .section-heading {
     font-size: 1.5rem;
-    color: var(--primary-dark);
+    color: var(--primary-color);
     margin-bottom: 1rem;
+    font-weight: 700;
 }
 
 .about-text-section p {
-    color: var(--text-dark);
-    font-size: 1.1rem;
+    color: var(--text-light);
+    font-size: 1.05rem;
     line-height: 1.8;
     margin-bottom: 1.5rem;
 }
@@ -95,11 +101,18 @@
 .mini-feature {
     background: white;
     padding: 2rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius-xl);
     box-shadow: var(--card-shadow);
     display: flex;
     align-items: flex-start;
     gap: 1.5rem;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.mini-feature:hover {
+    border-color: var(--accent-color);
+    box-shadow: var(--card-shadow-lg);
 }
 
 .mini-icon {
@@ -111,13 +124,14 @@
 
 .mini-feature h4 {
     font-size: 1.25rem;
-    color: var(--primary-dark);
+    color: var(--primary-color);
     margin-bottom: 0.5rem;
+    font-weight: 700;
 }
 
 .mini-feature p {
-    color: var(--text-light);
-    line-height: 1.5;
+    color: var(--text-muted);
+    line-height: 1.6;
 }
 
 @media (max-width: 900px) {
@@ -127,5 +141,9 @@
 
     .mission-text {
         font-size: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 2.25rem;
     }
 }

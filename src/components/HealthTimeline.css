@@ -1,0 +1,220 @@
+.health-timeline-container {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.health-timeline-empty {
+    margin-top: 3rem;
+    padding: 4rem;
+    background: white;
+    border-radius: var(--border-radius-2xl);
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px dashed #cbd5e1;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.5rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.timeline-title-area h2 {
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.timeline-title-area p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.metric-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metric-selector label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-slate);
+}
+
+.metric-selector select {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--border-radius-lg);
+    background-color: white;
+    font-size: 0.9375rem;
+    outline: none;
+    min-width: 240px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.metric-selector select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.timeline-content {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 2rem;
+}
+
+.chart-panel,
+.ai-insights-panel {
+    background: white;
+    border-radius: var(--border-radius-2xl);
+    box-shadow: var(--card-shadow);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+}
+
+.chart-panel h3 {
+    font-size: 1.125rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.chart-wrapper {
+    height: 400px;
+    width: 100%;
+}
+
+.ai-insights-panel {
+    gap: 1.5rem;
+}
+
+.trend-status-card {
+    padding: 1.5rem;
+    border-radius: var(--border-radius-xl);
+    border: 1px solid transparent;
+}
+
+.trend-status-card.bg-green-50 {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.trend-status-card.bg-yellow-50 {
+    background-color: #fefce8;
+    border-color: #fef08a;
+    color: #854d0e;
+}
+
+.trend-status-card.bg-red-50 {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+.trend-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.trend-header h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.prediction-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-xl);
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.prediction-card h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-slate);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+}
+
+.prediction-card p {
+    font-size: 0.9375rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+.disclaimer-note {
+    background-color: rgba(15, 23, 42, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-top: auto;
+}
+
+.disclaimer-note p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.info-alert {
+    background-color: rgba(20, 184, 166, 0.08);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+    color: var(--primary-color);
+    padding: 1.25rem;
+    border-radius: var(--border-radius-xl);
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+    .timeline-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .timeline-title-area h2 {
+        font-size: 1.5rem;
+    }
+
+    .metric-selector select {
+        min-width: 100%;
+    }
+}

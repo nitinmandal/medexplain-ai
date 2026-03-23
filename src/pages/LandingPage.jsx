@@ -1,80 +1,160 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileSearch, ShieldCheck, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Zap, Users, FileText, Activity, Building2, Building, Landmark, Hospital } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
+    const { t } = useTranslation();
+
     return (
         <div className="landing-page animate-fade-in">
             {/* Hero Section */}
             <section className="hero-section">
                 <div className="container hero-container">
                     <div className="hero-content">
-                        <h1 className="hero-title">Understand Your Medical Reports Instantly</h1>
+                        <div className="hero-badge">
+                            <span className="badge-dot-wrapper">
+                                <span className="badge-dot-ping"></span>
+                                <span className="badge-dot"></span>
+                            </span>
+                            <span className="badge-text">{t('landing.badge') || 'AI-Powered Medical Insights'}</span>
+                        </div>
+                        <h1 className="hero-title">
+                            {t('landing.hero.title_part1') || 'Simplifying Medical'} <span className="text-accent">{t('landing.hero.title_accent') || 'Insights'}</span> {t('landing.hero.title_part2') || 'with AI'}
+                        </h1>
                         <p className="hero-subtitle">
-                            Upload your medical report and get simple explanations of your test results within seconds.
+                            {t('landing.hero.subtitle') || 'Empowering healthcare professionals and patients with instant, accurate, and actionable AI-driven medical analysis. Bridge the gap between data and care.'}
                         </p>
                         <div className="hero-actions">
-                            <Link to="/upload" className="btn btn-primary btn-lg">Upload Your Report</Link>
-                            <Link to="/about" className="btn btn-outline btn-lg">How It Works</Link>
-                        </div>
-                        <div className="hero-disclaimer">
-                            <ShieldCheck className="icon-small" />
-                            <span>Secure, Private & Confidential</span>
+                            <Link to="/upload" className="btn btn-primary btn-lg">
+                                {t('landing.hero.cta') || 'Upload Report'}
+                            </Link>
+                            <Link to="/about" className="btn btn-outline btn-lg">
+                                {t('landing.hero.demo') || 'View Demo'}
+                            </Link>
                         </div>
                     </div>
-                    <div className="hero-image">
-                        <div className="illustration-placeholder">
-                            <FileSearch className="illustration-icon" />
-                            <div className="pulse-circle"></div>
+                    <div className="hero-visual">
+                        <div className="hero-glow-1"></div>
+                        <div className="hero-glow-2"></div>
+                        <div className="hero-image-card">
+                            <div className="hero-image-overlay">
+                                <Activity className="hero-analytics-icon" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Trust Signals */}
+            <section className="trust-section">
+                <div className="container">
+                    <p className="trust-label">{t('landing.trust.label') || 'Trusted by Global Healthcare Leaders'}</p>
+                    <div className="trust-logos">
+                        <div className="trust-logo-item">
+                            <Building2 size={28} />
+                            <span>Mayo Clinic</span>
+                        </div>
+                        <div className="trust-logo-item">
+                            <Building size={28} />
+                            <span>Johns Hopkins</span>
+                        </div>
+                        <div className="trust-logo-item">
+                            <Landmark size={28} />
+                            <span>Cleveland Clinic</span>
+                        </div>
+                        <div className="trust-logo-item">
+                            <Hospital size={28} />
+                            <span>Kaiser Permanente</span>
+                        </div>
+                    </div>
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-value text-primary">500+</div>
+                            <p className="stat-label">{t('landing.stats.hospitals') || 'Hospitals Integrated'}</p>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value text-accent">99.9%</div>
+                            <p className="stat-label">{t('landing.stats.accuracy') || 'Accuracy Rate'}</p>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value text-primary">2M+</div>
+                            <p className="stat-label">{t('landing.stats.insights') || 'Insights Generated'}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Core Features Section */}
+            <section className="features-section" id="features">
+                <div className="container">
+                    <div className="features-header">
+                        <span className="section-label">{t('landing.features.label') || 'Core Capabilities'}</span>
+                        <h3 className="section-heading">{t('landing.features.title') || 'Advanced AI solutions for the modern healthcare landscape.'}</h3>
+                    </div>
+                    <div className="features-grid">
+                        <div className="feature-card">
+                            <div className="feature-icon-box">
+                                <Zap size={28} color="white" />
+                            </div>
+                            <h4 className="feature-title">{t('landing.features.analysis.title') || 'AI Analysis'}</h4>
+                            <p className="feature-desc">
+                                {t('landing.features.analysis.desc') || 'Deep learning models process medical imagery and data with unprecedented speed and precision.'}
+                            </p>
+                        </div>
+                        <div className="feature-card">
+                            <div className="feature-icon-box">
+                                <Users size={28} color="white" />
+                            </div>
+                            <h4 className="feature-title">{t('landing.features.collab.title') || 'Health Trends'}</h4>
+                            <p className="feature-desc">
+                                {t('landing.features.collab.desc') || 'Track your medical history over time and visualize progress with interactive health timelines.'}
+                            </p>
+                        </div>
+                        <div className="feature-card">
+                            <div className="feature-icon-box">
+                                <FileText size={28} color="white" />
+                            </div>
+                            <h4 className="feature-title">{t('landing.features.summary.title') || 'Patient Summaries'}</h4>
+                            <p className="feature-desc">
+                                {t('landing.features.summary.desc') || 'Convert complex clinical jargon into clear, simplified reports that help patients understand their health.'}
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* How It Works Section */}
-            <section className="how-it-works-section bg-light">
+            <section id="how-it-works" className="how-it-works-section">
                 <div className="container">
-                    <h2 className="section-title">How It Works</h2>
-                    <div className="steps-container">
-                        <div className="step-card">
-                            <div className="step-number">1</div>
-                            <h3 className="step-title">Upload Report</h3>
-                            <p className="step-desc">Upload your medical lab report as a PDF, JPG, or PNG file securely.</p>
-                        </div>
-                        <div className="step-card">
-                            <div className="step-number">2</div>
-                            <h3 className="step-title">AI Analysis</h3>
-                            <p className="step-desc">Our advanced AI scans and extracts your complex lab test values seamlessly.</p>
-                        </div>
-                        <div className="step-card">
-                            <div className="step-number">3</div>
-                            <h3 className="step-title">Get Insights</h3>
-                            <p className="step-desc">Receive easy-to-understand explanations and insights of your health metrics.</p>
-                        </div>
+                    <div className="hiw-header">
+                        <span className="section-label section-label-light">{t('landing.hiw.label') || 'The Process'}</span>
+                        <h2 className="section-heading-light">{t('landing.hiw.title') || 'How MedExplain Works'}</h2>
                     </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="features-section">
-                <div className="container">
-                    <h2 className="section-title">Key Features</h2>
-                    <div className="features-grid">
-                        <div className="feature-card">
-                            <Zap className="feature-icon" />
-                            <h3 className="feature-title">Instant Explanation</h3>
-                            <p>Get immediate, plain-language translations of medical jargon.</p>
-                        </div>
-                        <div className="feature-card">
-                            <ShieldCheck className="feature-icon" />
-                            <h3 className="feature-title">Privacy First</h3>
-                            <p>Reports are securely processed and automatically deleted after analysis.</p>
-                        </div>
-                        <div className="feature-card">
-                            <FileSearch className="feature-icon" />
-                            <h3 className="feature-title">AI-Powered Extraction</h3>
-                            <p>State-of-the-art AI accurately identifies key biomarkers and metrics.</p>
+                    <div className="hiw-timeline">
+                        <div className="hiw-progress-line"></div>
+                        <div className="hiw-steps">
+                            <div className="hiw-step">
+                                <div className="hiw-number">1</div>
+                                <h3 className="hiw-step-title">{t('landing.hiw.step1.title') || 'Upload Report'}</h3>
+                                <p className="hiw-step-desc">{t('landing.hiw.step1.desc') || 'Securely upload your lab results or medical documents.'}</p>
+                            </div>
+                            <div className="hiw-step">
+                                <div className="hiw-number">2</div>
+                                <h3 className="hiw-step-title">{t('landing.hiw.step2.title') || 'AI Processing'}</h3>
+                                <p className="hiw-step-desc">{t('landing.hiw.step2.desc') || 'Our proprietary neural engine analyzes every data point.'}</p>
+                            </div>
+                            <div className="hiw-step">
+                                <div className="hiw-number">3</div>
+                                <h3 className="hiw-step-title">{t('landing.hiw.step3.title') || 'Verification'}</h3>
+                                <p className="hiw-step-desc">{t('landing.hiw.step3.desc') || 'Results are cross-referenced with medical terminology.'}</p>
+                            </div>
+                            <div className="hiw-step">
+                                <div className="hiw-number">4</div>
+                                <h3 className="hiw-step-title">{t('landing.hiw.step4.title') || 'Get Insights'}</h3>
+                                <p className="hiw-step-desc">{t('landing.hiw.step4.desc') || 'Receive detailed, easy-to-understand health insights.'}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -82,10 +162,16 @@ const LandingPage = () => {
 
             {/* Call to Action Section */}
             <section className="cta-section">
-                <div className="container text-center">
-                    <h2 className="cta-title">Ready to understand your health better?</h2>
-                    <p className="cta-desc">Join thousands of users who demystified their medical reports today.</p>
-                    <Link to="/upload" className="btn btn-accent btn-lg">Start Analysis Now</Link>
+                <div className="container">
+                    <div className="cta-card">
+                        <div className="cta-glow-1"></div>
+                        <div className="cta-glow-2"></div>
+                        <h2 className="cta-title">{t('landing.cta.title') || 'Ready to understand your results?'}</h2>
+                        <p className="cta-desc">{t('landing.cta.subtitle') || 'Join thousands of users who use MedExplain to simplify their healthcare journey.'}</p>
+                        <Link to="/upload" className="btn btn-accent btn-lg cta-btn">
+                            {t('landing.cta.button') || 'Get Started Now'}
+                        </Link>
+                    </div>
                 </div>
             </section>
         </div>
