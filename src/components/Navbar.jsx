@@ -73,12 +73,12 @@ const Navbar = () => {
 
                             {user ? (
                                 <div className="user-profile-section">
-                                    <div className="user-badge">
+                                    <Link to="/profile" className="user-badge" onClick={() => setIsMenuOpen(false)}>
                                         <div className="user-avatar-circle">
                                             {user.name?.charAt(0) || 'U'}
                                         </div>
                                         <span className="user-name-text">{user.name}</span>
-                                    </div>
+                                    </Link>
                                     <button onClick={handleLogout} className="logout-btn">
                                         <LogOut size={16} />
                                         <span>Logout</span>

@@ -8,6 +8,8 @@ import SignupPage from './pages/SignupPage'
 import AboutPage from './pages/AboutPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import DisclaimerPage from './pages/DisclaimerPage'
+import NotFoundPage from './pages/NotFoundPage'
+import ProfilePage from './pages/ProfilePage'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -29,7 +31,11 @@ function App() {
                         <Route element={<ProtectedRoute />}>
                             <Route path="/upload" element={<UploadPage />} />
                             <Route path="/dashboard" element={<DashboardPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
                         </Route>
+
+                        {/* 404 Not Found */}
+                        <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                 </main>
                 <Footer />

@@ -156,6 +156,11 @@ const resources = {
           "critical": "Important markers are out of range. You should prioritize seeing a doctor as soon as possible."
         },
         "breakdown": "Detailed Breakdown"
+      },
+      "notfound": {
+        "title": "Page Not Found",
+        "text": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+        "button": "Return to Home"
       }
     }
   },
@@ -312,6 +317,11 @@ const resources = {
           "critical": "महत्वपूर्ण मार्कर सीमा से बाहर हैं। आपको जल्द से जल्द डॉक्टर से मिलने को प्राथमिकता देनी चाहिए।"
         },
         "breakdown": "विस्तृत विवरण"
+      },
+      "notfound": {
+        "title": "पृष्ठ नहीं मिला",
+        "text": "आप जो पृष्ठ खोज रहे हैं उसे शायद हटा दिया गया है, उसका नाम बदल दिया गया है, या अस्थायी रूप से अनुपलब्ध है।",
+        "button": "होम पर वापस जाएं"
       }
     }
   },
@@ -468,6 +478,11 @@ const resources = {
           "critical": "Important markers range se bahar hain. Doctor se jaldi consult karein."
         },
         "breakdown": "Detailed Breakdown"
+      },
+      "notfound": {
+        "title": "Page Nahi Mila",
+        "text": "Aap jo page dhoondh rahe hain wo shayed remove ho gaya hai, name change ho gaya hai ya abhi available nahi hai.",
+        "button": "Home Par Wapas Jayein"
       }
     }
   }
