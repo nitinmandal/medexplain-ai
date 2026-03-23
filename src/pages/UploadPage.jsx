@@ -9,6 +9,7 @@ const UploadPage = () => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
@@ -55,6 +56,14 @@ const UploadPage = () => {
 
         setIsAnalyzing(true);
         setError('');
+        setUploadProgress(0);
+
+        const progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+                if (prev >= 95) return 95;
+                return prev + Math.floor(Math.random() * 5) + 1;
+            });
+        }, 400);
 
         try {
             const formData = new FormData();
@@ -63,6 +72,7 @@ const UploadPage = () => {
 
             const token = localStorage.getItem('medexplain_token');
             if (!token) {
+                clearInterval(progressInterval);
                 setError('You must be logged in to analyze reports.');
                 setTimeout(() => navigate('/login'), 2000);
                 setIsAnalyzing(false);
@@ -90,9 +100,16 @@ const UploadPage = () => {
                 throw new Error(data.error || 'Failed to analyze report.');
             }
 
-            setIsAnalyzing(false);
-            navigate('/dashboard', { state: { results: data, id: data._id || new Date().toISOString() } });
+            clearInterval(progressInterval);
+            setUploadProgress(100);
+
+            setTimeout(() => {
+                setIsAnalyzing(false);
+                navigate('/dashboard', { state: { results: data, id: data._id || new Date().toISOString() } });
+            }, 600);
         } catch (err) {
+            clearInterval(progressInterval);
+            setUploadProgress(0);
             setIsAnalyzing(false);
             setError(err.message || 'Error connecting to the AI server.');
             if (err.message.includes('Session')) {
@@ -170,7 +187,18 @@ const UploadPage = () => {
                                     <div className="scanner-line"></div>
                                 </div>
                             </div>
-                            <p className="loading-title">{t('upload.ai_analyzing')}</p>
+                            <p className="loading-title">{t('upload.ai_analyzing') || 'AI is Analyzing...'}</p>
+                            
+                            <div className="progress-bar-wrapper">
+                                <div className="progress-bar-bg">
+                                    <div 
+                                        className="progress-bar-fill" 
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                                <span className="progress-text">{uploadProgress}%</span>
+                            </div>
+
                             <div className="loading-steps">
                                 <span className="typing-text">{t('upload.extracting')}</span>
                             </div>

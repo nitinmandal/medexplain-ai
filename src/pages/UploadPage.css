@@ -231,7 +231,40 @@
     color: var(--primary-color);
     font-weight: 700;
     font-size: 1.25rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    max-width: 300px;
+    margin: 1.25rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 10px;
+    background-color: #e2e8f0;
+    border-radius: var(--border-radius-full);
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-light));
+    border-radius: var(--border-radius-full);
+    transition: width 0.3s ease-out;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .loading-steps {
