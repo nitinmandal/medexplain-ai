@@ -46,12 +46,20 @@
 .upload-box:hover {
     border-color: var(--accent-color);
     background-color: rgba(20, 184, 166, 0.03);
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+    transform: translateY(-2px);
 }
 
 .upload-box.has-file {
     border: 2px solid var(--accent-color);
     background-color: rgba(20, 184, 166, 0.05);
     padding: 2.5rem 2rem;
+    animation: pulseBox 3s infinite alternate;
+}
+
+@keyframes pulseBox {
+    0% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+    100% { box-shadow: 0 0 20px 0 rgba(20, 184, 166, 0.2); }
 }
 
 .upload-box.has-error {
