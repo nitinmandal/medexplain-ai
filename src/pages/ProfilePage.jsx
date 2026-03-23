@@ -16,10 +16,25 @@ const ProfilePage = () => {
             setUser(JSON.parse(storedUser));
         }
 
-        const storedHistory = localStorage.getItem('medexplain_reports_history');
-        if (storedHistory) {
-            setHistory(JSON.parse(storedHistory));
-        }
+        const fetchHistory = async () => {
+            try {
+                const token = localStorage.getItem('medexplain_token');
+                const res = await fetch('http://localhost:5001/api/reports', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setHistory(data);
+                    localStorage.setItem('medexplain_reports_history', JSON.stringify(data));
+                }
+            } catch (err) {
+                console.error("Failed to fetch history from server", err);
+                const storedHistory = localStorage.getItem('medexplain_reports_history');
+                if (storedHistory) setHistory(JSON.parse(storedHistory));
+            }
+        };
+
+        fetchHistory();
     }, []);
 
     const handleViewReport = (report) => {

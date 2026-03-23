@@ -12,6 +12,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import dns from 'dns';
 import User from './models/User.js';
+import Report from './models/Report.js';
 
 dotenv.config();
 
@@ -195,6 +196,19 @@ Example structure:
 
         try {
             const parsedData = JSON.parse(outputText);
+            
+            // Save report to database
+            const reportId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+            const newReport = new Report({
+                user: req.user.id,
+                reportId: reportId,
+                date: parsedData.reportDate || new Date().toISOString().split('T')[0],
+                results: parsedData.results || [],
+                fullData: parsedData
+            });
+            await newReport.save();
+            
+            parsedData._id = newReport.reportId;
             res.json(parsedData);
         } catch (parseError) {
             console.error('Failed to parse AI output:', outputText);
@@ -283,6 +297,23 @@ Always remind the user to consult a doctor for a definitive diagnosis if they se
     } catch (error) {
         console.error('Error in /api/chat:', error);
         res.status(500).json({ error: 'Failed to generate an answer. Please try again.' });
+    }
+});
+
+// --- Reports Endpoint ---
+app.get('/api/reports', protect, async (req, res) => {
+    try {
+        const reports = await Report.find({ user: req.user.id }).sort({ createdAt: -1 });
+        const historyData = reports.map(r => ({
+            id: r.reportId,
+            date: r.date,
+            results: r.results,
+            fullData: r.fullData
+        }));
+        res.json(historyData);
+    } catch (error) {
+        console.error('Error fetching reports:', error);
+        res.status(500).json({ error: 'Failed to fetch reports' });
     }
 });
 

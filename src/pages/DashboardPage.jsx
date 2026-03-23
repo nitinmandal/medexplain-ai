@@ -81,19 +81,36 @@ const DashboardPage = () => {
             return;
         }
         if (reportId && results.length > 0) {
-            const existingHistory = JSON.parse(localStorage.getItem('medexplain_reports_history') || '[]');
-            const exists = existingHistory.find(r => r.id === reportId);
-            if (!exists) {
-                const newReport = {
-                    id: reportId,
-                    date: dataObj?.reportDate || reportId,
-                    results: results
-                };
-                localStorage.setItem('medexplain_reports_history', JSON.stringify([...existingHistory, newReport]));
-                setTriggerUpdate(prev => prev + 1);
-            }
+            const fetchHistory = async () => {
+                try {
+                    const token = localStorage.getItem('medexplain_token');
+                    if (token) {
+                        const res = await fetch('http://localhost:5001/api/reports', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            localStorage.setItem('medexplain_reports_history', JSON.stringify(data));
+                            setTriggerUpdate(prev => prev + 1);
+                        }
+                    }
+                } catch (err) {
+                    const existingHistory = JSON.parse(localStorage.getItem('medexplain_reports_history') || '[]');
+                    const exists = existingHistory.find(r => r.id === reportId);
+                    if (!exists) {
+                        const newReport = {
+                            id: reportId,
+                            date: dataObj?.reportDate || reportId,
+                            results: results
+                        };
+                        localStorage.setItem('medexplain_reports_history', JSON.stringify([...existingHistory, newReport]));
+                        setTriggerUpdate(prev => prev + 1);
+                    }
+                }
+            };
+            fetchHistory();
         }
-    }, [results, navigate, reportId]);
+    }, [results, navigate, reportId, dataObj]);
 
     const getStatusColor = (status) => {
         switch (status) {

@@ -91,7 +91,7 @@ const UploadPage = () => {
             }
 
             setIsAnalyzing(false);
-            navigate('/dashboard', { state: { results: data, id: new Date().toISOString() } });
+            navigate('/dashboard', { state: { results: data, id: data._id || new Date().toISOString() } });
         } catch (err) {
             setIsAnalyzing(false);
             setError(err.message || 'Error connecting to the AI server.');
