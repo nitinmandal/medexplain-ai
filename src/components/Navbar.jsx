@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Globe, Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +8,10 @@ import './Navbar.css';
 const Navbar = () => {
     const { t, i18n } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLangOpen, setIsLangOpen] = useState(false);
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
+    const langRef = useRef(null);
 
     const checkAuth = () => {
         const storedUser = localStorage.getItem('medexplain_user');
@@ -23,7 +25,18 @@ const Navbar = () => {
     useEffect(() => {
         checkAuth();
         window.addEventListener('user-auth-change', checkAuth);
-        return () => window.removeEventListener('user-auth-change', checkAuth);
+        
+        const handleClickOutside = (event) => {
+            if (langRef.current && !langRef.current.contains(event.target)) {
+                setIsLangOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        
+        return () => {
+            window.removeEventListener('user-auth-change', checkAuth);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -34,8 +47,9 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    const changeLanguage = (e) => {
-        i18n.changeLanguage(e.target.value);
+    const handleLanguageChange = (lang) => {
+        i18n.changeLanguage(lang);
+        setIsLangOpen(false);
     };
 
     return (
@@ -58,16 +72,31 @@ const Navbar = () => {
                         <Link to="/about" className="nav-link" onClick={() => setIsMenuOpen(false)}>{t('navbar.about')}</Link>
                         
                         <div className="nav-actions-container">
-                            <div className="language-dropdown">
-                                <Globe size={16} className="globe-icon" />
-                                <select 
-                                    className="language-select" 
-                                    onChange={changeLanguage} 
-                                    value={i18n.language}
+                            <div className="language-dropdown-container" ref={langRef}>
+                                <button 
+                                    className="language-dropdown-trigger" 
+                                    onClick={() => setIsLangOpen(!isLangOpen)}
                                 >
-                                    <option value="en">English</option>
-                                    <option value="hi">हिन्दी</option>
-                                </select>
+                                    <Globe size={16} className="globe-icon" />
+                                    <span>{i18n.language === 'hi' ? 'हिन्दी' : 'English'}</span>
+                                </button>
+                                
+                                {isLangOpen && (
+                                    <div className="language-dropdown-menu">
+                                        <button 
+                                            className={`language-option ${i18n.language === 'en' ? 'active' : ''}`}
+                                            onClick={() => handleLanguageChange('en')}
+                                        >
+                                            English
+                                        </button>
+                                        <button 
+                                            className={`language-option ${i18n.language === 'hi' ? 'active' : ''}`}
+                                            onClick={() => handleLanguageChange('hi')}
+                                        >
+                                            हिन्दी
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             {user ? (
