@@ -38,18 +38,28 @@ const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
 
 app.use(cors({
     origin: function (origin, callback) {
-        // STRICT CORS: Only mapped explicitly allowed origins
-        // Do not allow missing origin in production (prevents curl/postman abuse unless bypassed)
-        if (!origin && process.env.NODE_ENV !== 'production') {
+        // Allow requests with no origin (server-to-server, curl in dev)
+        if (!origin) {
             return callback(null, true);
         }
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            console.warn(`Blocked by CORS: ${origin}`);
-            callback(new Error('Origin not allowed by strict CORS policy.'));
+
+        // Allow localhost in development
+        if (origin.startsWith('http://localhost')) {
+            return callback(null, true);
         }
+
+        // Allow any Netlify subdomain
+        if (origin.endsWith('.netlify.app')) {
+            return callback(null, true);
+        }
+
+        // Allow explicitly listed origins from env
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
+        }
+
+        console.warn(`Blocked by CORS: ${origin}`);
+        callback(new Error('Origin not allowed by strict CORS policy.'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
