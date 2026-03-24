@@ -2,7 +2,7 @@
 .hero-section {
     position: relative;
     overflow: hidden;
-    padding: 5rem 0 8rem;
+    padding: 5rem 0 4rem;
 }
 
 .hero-container {
@@ -152,6 +152,16 @@
     100% { transform: translateY(0px); }
 }
 
+@keyframes breathe {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.hero-image-card img {
+    animation: breathe 8s ease-in-out infinite;
+}
+
 .hero-image-overlay {
     position: absolute;
     inset: 0;
@@ -252,7 +262,7 @@
 
 /* ==================== FEATURES ==================== */
 .features-section {
-    padding: 6rem 0;
+    padding: 4rem 0 6rem;
 }
 
 .features-header {

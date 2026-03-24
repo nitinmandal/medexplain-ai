@@ -23,13 +23,9 @@
 }
 
 .auth-logo {
-    display: inline-flex;
+    display: flex;
     justify-content: center;
     align-items: center;
-    width: 64px;
-    height: 64px;
-    background-color: rgba(20, 184, 166, 0.1);
-    border-radius: 50%;
     margin-bottom: 1.5rem;
 }
 

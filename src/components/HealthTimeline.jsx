@@ -91,7 +91,7 @@ const HealthTimeline = ({ triggerUpdate }) => {
                 throw new Error('Not authorized. Please log in to view insights.');
             }
 
-            const response = await fetch('http://localhost:5001/api/analyze-trend', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/analyze-trend`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

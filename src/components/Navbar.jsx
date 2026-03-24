@@ -68,7 +68,17 @@ const Navbar = () => {
                     <nav className={`navbar-links ${isMenuOpen ? 'active' : ''}`}>
                         <Link to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>{t('navbar.home')}</Link>
                         <Link to="/upload" className="nav-link" onClick={() => setIsMenuOpen(false)}>{t('navbar.upload')}</Link>
-                        <a href="/#how-it-works" className="nav-link" onClick={() => setIsMenuOpen(false)}>{t('navbar.how_it_works')}</a>
+                        <a href="/#how-it-works" className="nav-link" onClick={(e) => {
+                            if (window.location.pathname === '/' || window.location.pathname === '') {
+                                e.preventDefault();
+                                const element = document.getElementById('how-it-works');
+                                if (element) {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                    window.history.pushState(null, '', '/#how-it-works');
+                                }
+                            }
+                            setIsMenuOpen(false);
+                        }}>{t('navbar.how_it_works')}</a>
                         <Link to="/about" className="nav-link" onClick={() => setIsMenuOpen(false)}>{t('navbar.about')}</Link>
                         
                         <div className="nav-actions-container">

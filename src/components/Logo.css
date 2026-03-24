@@ -21,12 +21,11 @@
     height: 40px;
     width: auto;
     object-fit: contain;
-    filter: brightness(0) invert(1); /* White logo on dark navbar */
+    border-radius: 8px; /* Added slight rounding since it has a background */
 }
 
 .logo-large .custom-logo-img {
     height: 64px;
-    filter: none; /* Normal on light backgrounds */
 }
 
 .logo-text-wrapper {

@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '../assets/logo2.png';
+import logoImg from '../assets/logo-new.png';
 import './Logo.css';
 
 const Logo = ({ size = 'normal', onClick }) => {

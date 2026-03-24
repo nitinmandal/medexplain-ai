@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Zap, Users, FileText, Activity, Building2, Building, Landmark, Hospital } from 'lucide-react';
+import { Zap, Users, FileText } from 'lucide-react';
+import heroImg from '../assets/hero-dashboard.png';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -39,52 +40,13 @@ const LandingPage = () => {
                         <div className="hero-glow-1"></div>
                         <div className="hero-glow-2"></div>
                         <div className="hero-image-card">
-                            <div className="hero-image-overlay">
-                                <Activity className="hero-analytics-icon" />
-                            </div>
+                            <img src={heroImg} alt="AI Medical Dashboard" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Trust Signals */}
-            <section className="trust-section">
-                <div className="container">
-                    <p className="trust-label">{t('landing.trust.label') || 'Trusted by Global Healthcare Leaders'}</p>
-                    <div className="trust-logos">
-                        <div className="trust-logo-item">
-                            <Building2 size={28} />
-                            <span>Mayo Clinic</span>
-                        </div>
-                        <div className="trust-logo-item">
-                            <Building size={28} />
-                            <span>Johns Hopkins</span>
-                        </div>
-                        <div className="trust-logo-item">
-                            <Landmark size={28} />
-                            <span>Cleveland Clinic</span>
-                        </div>
-                        <div className="trust-logo-item">
-                            <Hospital size={28} />
-                            <span>Kaiser Permanente</span>
-                        </div>
-                    </div>
-                    <div className="stats-grid">
-                        <div className="stat-card">
-                            <div className="stat-value text-primary">500+</div>
-                            <p className="stat-label">{t('landing.stats.hospitals') || 'Hospitals Integrated'}</p>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-value text-accent">99.9%</div>
-                            <p className="stat-label">{t('landing.stats.accuracy') || 'Accuracy Rate'}</p>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-value text-primary">2M+</div>
-                            <p className="stat-label">{t('landing.stats.insights') || 'Insights Generated'}</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
 
             {/* Core Features Section */}
             <section className="features-section" id="features">

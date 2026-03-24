@@ -34,7 +34,7 @@ const HealthChat = ({ contextData }) => {
 
         try {
             const token = localStorage.getItem('medexplain_token');
-            const res = await fetch('http://localhost:5001/api/chat', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

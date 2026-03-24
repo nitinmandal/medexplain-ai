@@ -20,7 +20,7 @@ const SignupPage = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:5001/api/auth/signup', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
@@ -47,7 +47,7 @@ const SignupPage = () => {
             <div className="auth-container">
                 <div className="auth-header">
                     <div className="auth-logo">
-                        <Logo />
+                        <Logo size="large" />
                     </div>
                     <h1 className="auth-title">{t('auth.signup.title')}</h1>
                     <p className="auth-subtitle">{t('auth.signup.subtitle')}</p>

@@ -10,6 +10,8 @@ const UploadPage = () => {
     const [error, setError] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [loadingStep, setLoadingStep] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
@@ -40,10 +42,17 @@ const UploadPage = () => {
 
     const handleDragOver = (e) => {
         e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
     };
 
     const handleDrop = (e) => {
         e.preventDefault();
+        setIsDragging(false);
         const droppedFile = e.dataTransfer.files[0];
         validateAndSetFile(droppedFile);
     };
@@ -60,8 +69,11 @@ const UploadPage = () => {
 
         const progressInterval = setInterval(() => {
             setUploadProgress(prev => {
-                if (prev >= 95) return 95;
-                return prev + Math.floor(Math.random() * 5) + 1;
+                const current = Number(prev);
+                if (current >= 95) return current + (Math.random() * 0.2); // Extremely slow crawl at 95%
+                if (current >= 80) return current + (Math.random() * 0.8); // Very slow from 80% to 95%
+                if (current >= 50) return current + (Math.random() * 2);   // Moderate from 50% to 80%
+                return current + Math.floor(Math.random() * 6) + 3;      // Fast from 0% to 50%
             });
         }, 400);
 
@@ -79,7 +91,7 @@ const UploadPage = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5001/api/analyze', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/analyze`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -128,8 +140,9 @@ const UploadPage = () => {
                     </div>
 
                     <div
-                        className={`upload-box ${file ? 'has-file' : ''} ${error ? 'has-error' : ''}`}
+                        className={`upload-box ${file ? 'has-file' : ''} ${error ? 'has-error' : ''} ${isDragging ? 'is-dragging' : ''}`}
                         onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
@@ -193,14 +206,21 @@ const UploadPage = () => {
                                 <div className="progress-bar-bg">
                                     <div 
                                         className="progress-bar-fill" 
-                                        style={{ width: `${uploadProgress}%` }}
+                                        style={{ width: `${Math.min(100, uploadProgress)}%` }}
                                     ></div>
                                 </div>
-                                <span className="progress-text">{uploadProgress}%</span>
+                                <span className="progress-text">
+                                    {Math.min(100, Math.floor(uploadProgress))}%
+                                </span>
                             </div>
 
                             <div className="loading-steps">
-                                <span className="typing-text">{t('upload.extracting')}</span>
+                                <span className="typing-text">
+                                    {uploadProgress < 20 ? t('upload.extracting') :
+                                     uploadProgress < 50 ? "Translating medical terminology..." :
+                                     uploadProgress < 85 ? "Evaluating health risks..." :
+                                                           "Finalizing AI Insights..."}
+                                </span>
                             </div>
                         </div>
                     )}

@@ -14,7 +14,7 @@ import dns from 'dns';
 import User from './models/User.js';
 import Report from './models/Report.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 // Override default broken local DNS resolution specifically for environments where 127.0.0.1 drops SRV connections
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -33,22 +33,29 @@ const app = express();
 
 // --- 3. Strict CORS Configuration ---
 const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
-    ? process.env.CORS_ALLOWED_ORIGINS.split(',')
-    : ['http://localhost:3000', 'http://localhost:5173'];
+    ? process.env.CORS_ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:5173']; // Local development frontend URL
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (e.g., mobile apps, curl) or explicitly allowed origins
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        // STRICT CORS: Only mapped explicitly allowed origins
+        // Do not allow missing origin in production (prevents curl/postman abuse unless bypassed)
+        if (!origin && process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+        }
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
-            callback(new Error('Origin not allowed by CORS policy'));
+            console.warn(`Blocked by CORS: ${origin}`);
+            callback(new Error('Origin not allowed by strict CORS policy.'));
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    maxAge: 86400 // Cache preflight requests for 24 hours
 }));
 
 app.use(helmet());
@@ -58,22 +65,35 @@ app.use(express.json({ limit: '1mb' }));
 const apiLimiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), // Default: 1 minute
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // Default: 100 requests per window
+    keyGenerator: (req) => {
+        // User-based rate limiting if authenticated, otherwise fallback to IP
+        if (req.user && req.user.id) {
+            return `user_${req.user.id}`;
+        }
+        return req.headers['x-forwarded-for'] || req.ip;
+    },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    message: { error: 'Too many requests, please try again later.' }
+    message: { error: 'Rate limit exceeded (100 requests/minute). Please try again later.' }
 });
 
 const authLimiter = rateLimit({
     windowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '300000'), // Default: 5 minutes
-    max: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '20'), // Default: 20 failed attempts
+    max: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '10'), // Strict: 10 failed attempts
+    keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip, // IP-based for unauthenticated auth attempts
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Too many authentication attempts, please try again later.' }
+    message: { error: 'Too many authentication attempts from this IP, please try again after 5 minutes.' }
 });
 
 // --- 2. Authentication & Authorization Middleware ---
 const protect = async (req, res, next) => {
     let token;
+
+    if (!process.env.JWT_SECRET) {
+        console.error("FATAL ERROR: JWT_SECRET is not defined.");
+        return res.status(500).json({ error: 'Server misconfiguration.' }); 
+    }
 
     // Check if token exists in Authorization header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -83,9 +103,14 @@ const protect = async (req, res, next) => {
             // Verify JWT token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Add user info to request (needed for user-based rate limiting & controllers)
-            req.user = { id: decoded.id };
+            // Fetch user from DB to ensure they still exist and aren't suspended
+            const user = await User.findById(decoded.id).select('-password');
+            if (!user) {
+                return res.status(401).json({ error: 'User associated with this token no longer exists.' });
+            }
 
+            // Add user info to request
+            req.user = user;
             next();
         } catch (error) {
             console.error('Auth middleware error:', error.message);
@@ -96,12 +121,18 @@ const protect = async (req, res, next) => {
     }
 };
 
-// Set up Multer for handling file uploads (temporarily stores them in 'uploads' folder)
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-const upload = multer({ dest: 'uploads/' });
+// Role-based Authorization Guard
+const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role || 'user')) {
+            return res.status(403).json({ error: 'Forbidden: You do not have the required access level for this route.' });
+        }
+        next();
+    };
+};
+
+// Set up Multer for handling file uploads (using memory storage to avoid restarts and disk usage)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -113,14 +144,11 @@ app.post('/api/analyze', protect, apiLimiter, upload.single('report'), async (re
         }
 
         if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-            fs.unlinkSync(req.file.path);
             return res.status(500).json({ error: 'Gemini API key is missing. Please configure it in backend/.env file.' });
         }
 
-        // Read the file into Base64 for the API
-        const fileData = fs.readFileSync(req.file.path);
-
-        const base64Data = Buffer.from(fileData).toString('base64');
+        // Read the file from memory buffer into Base64 for the API
+        const base64Data = req.file.buffer.toString('base64');
         const mimeType = req.file.mimetype;
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -185,8 +213,7 @@ Example structure:
             }
         ]);
 
-        // Clean up uploaded file immediately after processing
-        fs.unlinkSync(req.file.path);
+        // No file cleanup needed since it's in memory
 
         let outputText = result.response.text();
         // Sometimes the AI wraps it in markdown, we should clean it.
@@ -215,9 +242,6 @@ Example structure:
 
     } catch (error) {
         console.error('Error in /api/analyze:', error);
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
         res.status(500).json({ error: error.message || 'An error occurred during analysis.' });
     }
 });
@@ -299,7 +323,7 @@ Always remind the user to consult a doctor for a definitive diagnosis if they se
 });
 
 // --- Reports Endpoint ---
-app.get('/api/reports', protect, async (req, res) => {
+app.get('/api/reports', protect, apiLimiter, async (req, res) => {
     try {
         const reports = await Report.find({ user: req.user.id }).sort({ createdAt: -1 });
         const historyData = reports.map(r => ({

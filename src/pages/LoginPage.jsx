@@ -19,7 +19,7 @@ const LoginPage = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:5001/api/auth/login', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -46,7 +46,7 @@ const LoginPage = () => {
             <div className="auth-container">
                 <div className="auth-header">
                     <div className="auth-logo">
-                        <Logo />
+                        <Logo size="large" />
                     </div>
                     <h1 className="auth-title">{t('auth.login.title')}</h1>
                     <p className="auth-subtitle">{t('auth.login.subtitle')}</p>

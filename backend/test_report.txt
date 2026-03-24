@@ -1,0 +1,8 @@
+Patient Name: John Doe
+Date: 2026-03-24
+Test: Complete Blood Count (CBC)
+
+Hemoglobin: 11.2 g/dL (Normal: 13.8 - 17.2 g/dL) - LOW
+White Blood Cells: 8.5 x10^3/uL (Normal: 4.5 - 11.0 x10^3/uL)
+Platelets: 150 x10^3/uL (Normal: 150 - 450 x10^3/uL)
+Cholesterol: 240 mg/dL (Normal: < 200 mg/dL) - HIGH

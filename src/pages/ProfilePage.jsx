@@ -19,7 +19,7 @@ const ProfilePage = () => {
         const fetchHistory = async () => {
             try {
                 const token = localStorage.getItem('medexplain_token');
-                const res = await fetch('http://localhost:5001/api/reports', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/reports`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
