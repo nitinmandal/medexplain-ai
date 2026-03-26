@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Navbar from './components/Navbar'
 import LandingPage from './pages/LandingPage'
 import UploadPage from './pages/UploadPage'
@@ -14,9 +15,22 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
+    const { t } = useTranslation()
+
     return (
         <Router>
             <div className="app-container">
+                <div className="bg-particles">
+                    <div className="particle p1"></div>
+                    <div className="particle p2"></div>
+                    <div className="particle p3"></div>
+                    <div className="particle p4"></div>
+                    <div className="particle p5"></div>
+                    <div className="particle p6"></div>
+                </div>
+                <div className="disclaimer-banner">
+                    {t('navbar.trust_warning')}
+                </div>
                 <Navbar />
                 <main className="main-content">
                     <Routes>

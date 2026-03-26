@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Activity, AlertTriangle, CheckCircle, Info, Download, ArrowLeft, Loader2 } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Info, Download, ArrowLeft, Loader2, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -234,36 +234,54 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {(quickHighlights?.length > 0 || summary) && (
-                        <div className="summary-overview-card">
-                            <div className="summary-overview-header">
-                                <Info className="text-primary" size={20} />
-                                <h2>{t('dashboard.summary_title')}</h2>
+                    {(summary || quickHighlights?.length > 0) && (
+                        <div className="structured-output-grid">
+                            <div className="summary-overview-card glass-card">
+                                <div className="summary-overview-header">
+                                    <FileText className="text-accent" size={20} />
+                                    <h2>{t('dashboard.summary_label')}</h2>
+                                </div>
+                                <p className="summary-overview-text">{summary || quickHighlights?.[0]}</p>
                             </div>
-                            <div className="quick-highlights">
-                                {quickHighlights?.length > 0 ? (
-                                    <ul>{quickHighlights.map((highlight, i) => <li key={i}>{highlight}</li>)}</ul>
-                                ) : <p className="summary-overview-text">{summary}</p>}
-                            </div>
-                        </div>
-                    )}
 
-                    {(recommendations?.length > 0 || conclusion) && (
-                        <div className="summary-overview-card next-steps-card">
-                            <div className="summary-overview-header">
-                                <CheckCircle size={20} />
-                                <h2>{t('dashboard.next_steps')}</h2>
+                            <div className="summary-overview-card glass-card">
+                                <div className="summary-overview-header">
+                                    <AlertTriangle className="text-yellow-600" size={20} />
+                                    <h2>{t('dashboard.key_findings')}</h2>
+                                </div>
+                                <div className="quick-highlights">
+                                    {quickHighlights?.length > 0 ? (
+                                        <ul>{quickHighlights.map((highlight, i) => <li key={i}>{highlight}</li>)}</ul>
+                                    ) : <p className="summary-overview-text">{summary}</p>}
+                                </div>
                             </div>
-                            <div className="recommendations-list">
-                                {recommendations?.length > 0 ? (
-                                    <ul>{recommendations.map((rec, i) => <li key={i}>{rec}</li>)}</ul>
-                                ) : <p className="summary-overview-text">{conclusion}</p>}
+
+                            <div className="summary-overview-card glass-card">
+                                <div className="summary-overview-header">
+                                    <Info className="text-primary" size={20} />
+                                    <h2>{t('dashboard.what_it_means')}</h2>
+                                </div>
+                                <p className="summary-overview-text">
+                                    {conclusion || summary}
+                                </p>
+                            </div>
+
+                            <div className="summary-overview-card next-steps-card glass-card">
+                                <div className="summary-overview-header">
+                                    <CheckCircle size={20} />
+                                    <h2>{t('dashboard.suggested_next_steps')}</h2>
+                                </div>
+                                <div className="recommendations-list">
+                                    {recommendations?.length > 0 ? (
+                                        <ul>{recommendations.map((rec, i) => <li key={i}>{rec}</li>)}</ul>
+                                    ) : <p className="summary-overview-text">{conclusion}</p>}
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {riskScore !== null && riskLevel && (
-                        <div className="risk-meter-card">
+                        <div className="risk-meter-card animate-fade-in-up">
                             <div className="risk-meter-header">
                                 <div className="risk-title-wrapper">
                                     <Activity size={24} style={{ color: getRiskColor(riskLevel) }} />

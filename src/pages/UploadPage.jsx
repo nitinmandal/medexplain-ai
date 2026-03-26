@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadCloud, File, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, File, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import './UploadPage.css';
 
@@ -130,6 +130,79 @@ const UploadPage = () => {
         }
     };
 
+    const handleSampleReport = () => {
+        setIsAnalyzing(true);
+        setError('');
+        setUploadProgress(0);
+
+        const progressInterval = setInterval(() => {
+            setUploadProgress(prev => {
+                const current = Number(prev);
+                if (current >= 100) {
+                    clearInterval(progressInterval);
+                    return 100;
+                }
+                return current + 10;
+            });
+        }, 150);
+
+        const sampleData = {
+            reportDate: "2026-03-20",
+            summary: "Your overall results look good. Most values are in the normal range, but your Vitamin D level is slightly low and your LDL Cholesterol is at the upper limit.",
+            quickHighlights: [
+                "Vitamin D Deficiency",
+                "LDL Cholesterol Borderline High",
+                "Kidney & Liver function: Normal"
+            ],
+            recommendations: [
+                "Sun exposure and Vitamin D supplements",
+                "Increase fiber intake and reduce saturated fats",
+                "Re-test in 3 months"
+            ],
+            riskScore: 25,
+            riskLevel: "Low",
+            results: [
+                {
+                    testName: "Hemoglobin",
+                    value: "14.2",
+                    unit: "g/dL",
+                    normalRange: "13.0 - 17.0",
+                    status: "Normal",
+                    explanation: "Hemoglobin is the protein in your red blood cells that carries oxygen."
+                },
+                {
+                    testName: "LDL Cholesterol",
+                    value: "128",
+                    unit: "mg/dL",
+                    normalRange: "< 100",
+                    status: "High",
+                    explanation: "LDL is the 'bad' cholesterol; a lower number is better for heart health."
+                },
+                {
+                    testName: "Vitamin D, 25-Hydroxy",
+                    value: "18",
+                    unit: "ng/mL",
+                    normalRange: "30 - 100",
+                    status: "Low",
+                    explanation: "Vitamin D is essential for bone health and immune system function."
+                },
+                {
+                    testName: "HbA1c",
+                    value: "5.2",
+                    unit: "%",
+                    normalRange: "4.0 - 5.6",
+                    status: "Normal",
+                    explanation: "HbA1c shows your average blood sugar levels over the past 3 months."
+                }
+            ]
+        };
+
+        setTimeout(() => {
+            setIsAnalyzing(false);
+            navigate('/dashboard', { state: { results: sampleData, id: 'SAMPLE-' + Math.random().toString(36).substr(2, 6).toUpperCase() } });
+        }, 1500);
+    };
+
     return (
         <div className="upload-page animate-fade-in">
             <div className="container">
@@ -168,13 +241,25 @@ const UploadPage = () => {
                                 <UploadCloud className="upload-icon" />
                                 <h3>{t('upload.drag_drop')}</h3>
                                 <p>{t('upload.browse')}</p>
+                                <div className="upload-examples">
+                                    <span>{t('upload.placeholder_example')}</span>
+                                </div>
                                 <div className="upload-formats">{t('upload.supported')}</div>
                             </div>
                         )}
                     </div>
 
+                    <div className="upload-samples">
+                        <button className="btn btn-outline btn-sm" onClick={(e) => {
+                            e.stopPropagation();
+                            handleSampleReport();
+                        }}>
+                            {t('upload.try_sample')}
+                        </button>
+                    </div>
+
                     {error && (
-                        <div className="error-message">
+                        <div className="error-message animate-shake">
                             <AlertCircle size={16} />
                             <span>{error}</span>
                         </div>
@@ -189,7 +274,12 @@ const UploadPage = () => {
                             }}
                             disabled={!file || isAnalyzing}
                         >
-                            {isAnalyzing ? t('upload.analyzing') : t('upload.analyze_btn')}
+                            {isAnalyzing ? (
+                                <>
+                                    <Loader2 size={18} className="spin-icon mr-2" />
+                                    {t('upload.analyzing')}
+                                </>
+                            ) : t('upload.analyze_btn')}
                         </button>
                     </div>
 
@@ -224,6 +314,17 @@ const UploadPage = () => {
                             </div>
                         </div>
                     )}
+
+                    <div className="security-notice-v2">
+                        <div className="security-item">
+                            <CheckCircle2 size={14} />
+                            <span>{t('upload.data_privacy')}</span>
+                        </div>
+                        <div className="security-item">
+                            <AlertCircle size={14} />
+                            <span>{t('upload.ai_powered')}</span>
+                        </div>
+                    </div>
 
                     <div className="security-notice">
                         <AlertCircle size={14} />

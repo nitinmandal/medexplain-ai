@@ -11,8 +11,24 @@ import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import dns from 'dns';
+import winston from 'winston';
+import morgan from 'morgan';
 import User from './models/User.js';
 import Report from './models/Report.js';
+
+// --- 0. Setup Winston Logger ---
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' }),
+    ],
+});
 
 dotenv.config({ override: true });
 
@@ -70,18 +86,13 @@ app.use(cors({
 
 app.use(helmet());
 app.use(express.json({ limit: '1mb' }));
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
 // --- 1. Rate Limiting Configurations ---
 const apiLimiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'), // Default: 1 minute
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // Default: 100 requests per window
-    keyGenerator: (req) => {
-        // User-based rate limiting if authenticated, otherwise fallback to IP
-        if (req.user && req.user.id) {
-            return `user_${req.user.id}`;
-        }
-        return req.headers['x-forwarded-for'] || req.ip;
-    },
+    validate: { xForwardedForHeader: false },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: { error: 'Rate limit exceeded (100 requests/minute). Please try again later.' }
@@ -90,7 +101,7 @@ const apiLimiter = rateLimit({
 const authLimiter = rateLimit({
     windowMs: parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS || '300000'), // Default: 5 minutes
     max: parseInt(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || '10'), // Strict: 10 failed attempts
-    keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip, // IP-based for unauthenticated auth attempts
+    validate: { xForwardedForHeader: false },
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many authentication attempts from this IP, please try again after 5 minutes.' }
@@ -251,7 +262,11 @@ Example structure:
         }
 
     } catch (error) {
-        console.error('Error in /api/analyze:', error);
+        logger.error(`Analysis Error: ${error.message}`, { 
+            stack: error.stack,
+            userId: req.user?.id,
+            fileName: req.file?.originalname 
+        });
         res.status(500).json({ error: error.message || 'An error occurred during analysis.' });
     }
 });

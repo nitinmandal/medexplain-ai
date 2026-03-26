@@ -13,7 +13,8 @@ const resources = {
         "signin": "Sign In",
         "logout": "Logout",
         "get_started": "Get Started",
-        "disclaimer": "This platform provides informational insights only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional."
+        "disclaimer": "This platform provides informational insights only and does not replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional.",
+        "trust_warning": "⚠️ This tool is for educational purposes only and not a substitute for professional medical advice."
       },
       "chat": {
         "welcome": "Hi! I'm your MedExplain AI Assistant. Ask me anything about your report metrics!",
@@ -73,7 +74,11 @@ const resources = {
         "analyzing": "Analyzing...",
         "ai_analyzing": "AI is analyzing your report...",
         "extracting": "Extracting exact lab values and biomarkers...",
-        "security": "Your files are securely processed and automatically deleted immediately after analysis. We ensure complete privacy."
+        "security": "Your files are securely processed and automatically deleted immediately after analysis. We ensure complete privacy.",
+        "placeholder_example": "e.g. 'Blood test shows high cholesterol...'",
+        "try_sample": "Try with sample report",
+        "data_privacy": "Data is not stored",
+        "ai_powered": "Powered by AI (may make mistakes)"
       },
       "landing": {
         "badge": "AI-Powered Medical Insights",
@@ -155,7 +160,12 @@ const resources = {
           "high": "Important markers are out of range. You should prioritize seeing a doctor as soon as possible.",
           "critical": "Important markers are out of range. You should prioritize seeing a doctor as soon as possible."
         },
-        "breakdown": "Detailed Breakdown"
+        "breakdown": "Detailed Breakdown",
+        "summary_label": "Summary",
+        "key_findings": "Key Findings",
+        "what_it_means": "What it means",
+        "suggested_next_steps": "Suggested Next Steps",
+        "error_fallback": "Something went wrong. Please try again."
       },
       "notfound": {
         "title": "Page Not Found",
@@ -174,7 +184,8 @@ const resources = {
         "signin": "साइन इन करें",
         "logout": "लॉग आउट",
         "get_started": "शुरू करें",
-        "disclaimer": "यह प्लेटफ़ॉर्म केवल जानकारी प्रदान करता है और पेशेवर चिकित्सा सलाह, निदान या उपचार को प्रतिस्थापित नहीं करता है। हमेशा एक योग्य स्वास्थ्य देखभाल पेशेवर से परामर्श लें।"
+        "disclaimer": "यह प्लेटफ़ॉर्म केवल जानकारी प्रदान करता है और पेशेवर चिकित्सा सलाह, निदान या उपचार को प्रतिस्थापित नहीं करता है। हमेशा एक योग्य स्वास्थ्य देखभाल पेशेवर से परामर्श लें।",
+        "trust_warning": "⚠️ यह उपकरण केवल शैक्षिक उद्देश्यों के लिए है और पेशेवर चिकित्सा सलाह का विकल्प नहीं है।"
       },
       "chat": {
         "welcome": "नमस्ते! मैं आपका MedExplain AI असिस्टेंट हूँ। अपनी रिपोर्ट के बारे में कुछ भी पूछें!",
@@ -234,7 +245,11 @@ const resources = {
         "analyzing": "विश्लेषण हो रहा है...",
         "ai_analyzing": "AI आपकी रिपोर्ट का विश्लेषण कर रहा है...",
         "extracting": "सटीक लैब मूल्यों और बायोमार्कर को निकाला जा रहा है...",
-        "security": "आपकी फ़ाइलें सुरक्षित रूप से संसाधित होती हैं और विश्लेषण के तुरंत बाद स्वचालित रूप से हटा दी जाती हैं। हम पूर्ण गोपनीयता सुनिश्चित करते हैं।"
+        "security": "आपकी फ़ाइलें सुरक्षित रूप से संसाधित होती हैं और विश्लेषण के तुरंत बाद स्वचालित रूप से हटा दी जाती हैं। हम पूर्ण गोपनीयता सुनिश्चित करते हैं।",
+        "placeholder_example": "जैसे: 'रक्त परीक्षण उच्च कोलेस्ट्रॉल दिखाता है...'",
+        "try_sample": "नमूना रिपोर्ट के साथ प्रयास करें",
+        "data_privacy": "डेटा संग्रहीत नहीं किया जाता है",
+        "ai_powered": "AI द्वारा संचालित (गलतियाँ हो सकती हैं)"
       },
       "landing": {
         "badge": "AI-संचालित मेडिकल अंतर्दृष्टि",
@@ -316,7 +331,12 @@ const resources = {
           "high": "महत्वपूर्ण मार्कर सीमा से बाहर हैं। आपको जल्द से जल्द डॉक्टर से मिलने को प्राथमिकता देनी चाहिए।",
           "critical": "महत्वपूर्ण मार्कर सीमा से बाहर हैं। आपको जल्द से जल्द डॉक्टर से मिलने को प्राथमिकता देनी चाहिए।"
         },
-        "breakdown": "विस्तृत विवरण"
+        "breakdown": "विस्तृत विवरण",
+        "summary_label": "सारांश",
+        "key_findings": "मुख्य निष्कर्ष",
+        "what_it_means": "इसका क्या मतलब है",
+        "suggested_next_steps": "अनुशंसित अगले कदम",
+        "error_fallback": "कुछ गलत हो गया। कृपया पुन: प्रयास करें।"
       },
       "notfound": {
         "title": "पृष्ठ नहीं मिला",

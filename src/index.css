@@ -32,6 +32,7 @@
   --border-radius-lg: 0.75rem;
   --border-radius-xl: 1rem;
   --border-radius-2xl: 1.5rem;
+  --border-radius-3xl: 2rem;
   --border-radius-full: 9999px;
 
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -39,6 +40,13 @@
   --card-shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
 
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --border-radius-2xl: 1rem;
+    --border-radius-3xl: 1.5rem;
+  }
 }
 
 * {
@@ -55,22 +63,58 @@ html {
 body {
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow-x: hidden;
-  background-color: var(--bg-color);
+  background-color: #fbfcfe;
   background-image: 
-    radial-gradient(circle at top right, rgba(20, 184, 166, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at bottom left, rgba(15, 23, 42, 0.05) 0%, transparent 60%),
-    url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='1.5' fill='%230f172a' fill-opacity='0.06'/%3E%3C/svg%3E");
-  background-size: 100% 100%, 100% 100%, 24px 24px;
+    radial-gradient(at 0% 0%, hsla(174, 84%, 41%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 10%, hsla(212, 94%, 55%, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(174, 84%, 41%, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(212, 94%, 55%, 0.08) 0px, transparent 50%),
+    radial-gradient(at 20% 80%, hsla(174, 84%, 41%, 0.1) 0px, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40 L40 0 M-10 10 L10 -10 M30 50 L50 30' stroke='%230f172a' stroke-width='0.5' stroke-opacity='0.02' fill='none'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%230f172a' fill-opacity='0.04'/%3E%3C/svg%3E");
   background-attachment: fixed;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 40px 40px, 100px 100px;
   color: var(--text-dark);
   line-height: 1.6;
+}
+
+/* Live Floating Background Particles */
+.bg-particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.2;
+  animation: drift linear infinite;
+}
+
+.p1 { width: 400px; height: 400px; background: var(--accent-color); top: -100px; left: -100px; animation-duration: 40s; opacity: 0.1; }
+.p2 { width: 300px; height: 300px; background: #3b82f6; bottom: -50px; right: -50px; animation-duration: 50s; opacity: 0.08; }
+.p3 { width: 250px; height: 250px; background: var(--accent-color); top: 50%; left: 50%; animation-duration: 60s; opacity: 0.05; }
+.p4 { width: 350px; height: 350px; background: #60a5fa; top: 10%; right: 10%; animation-duration: 45s; opacity: 0.06; }
+.p5 { width: 200px; height: 200px; background: var(--accent-color); bottom: 10%; left: 10%; animation-duration: 55s; opacity: 0.07; }
+.p6 { width: 280px; height: 280px; background: #93c5fd; top: 40%; right: 20%; animation-duration: 48s; opacity: 0.05; }
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate(10vw, 10vh) scale(1.1) rotate(120deg); }
+  66% { transform: translate(-5vw, 15vh) scale(0.9) rotate(240deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(360deg); }
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 .main-content {
