@@ -698,11 +698,7 @@
 
 .demo-textarea:focus { outline: none; }
 
-.btn-block {
-    width: calc(100% - 4rem);
-    margin: 0 2rem 2rem;
-    color: white !important;
-}
+
 
 .demo-placeholder {
     height: 350px;
