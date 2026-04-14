@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Zap, Users, FileText, CheckCircle2, PlayCircle, ArrowRight, ShieldCheck, AlertTriangle } from 'lucide-react';
-import heroImg from '../assets/hero-dashboard.png';
+import { Zap, Users, FileText, PlayCircle, ArrowRight, ShieldCheck, AlertTriangle } from 'lucide-react';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -63,7 +61,7 @@ const LandingPage = () => {
                         <div className="benefit-card glass-card">
                             <ShieldCheck size={40} className="text-accent mb-4" />
                             <h3>Private & Secure</h3>
-                            <p>Your medical data isn't stored. We analyze it in real-time and delete it immediately.</p>
+                            <p>Your medical data isn&apos;t stored. We analyze it in real-time and delete it immediately.</p>
                         </div>
                     </div>
                 </div>
@@ -107,7 +105,7 @@ const LandingPage = () => {
                         <div className="wow-content">
                             <span className="badge-new">NEW</span>
                             <h2>PDF Upload & Highlighting</h2>
-                            <p>Simply upload your lab's PDF. Our AI automatically scans it, highlights abnormal values in red, and provides interactive tooltips explaining each one.</p>
+                            <p>Simply upload your lab&apos;s PDF. Our AI automatically scans it, highlights abnormal values in red, and provides interactive tooltips explaining each one.</p>
                             <Link to="/upload" className="btn btn-accent">Try PDF Analysis <ArrowRight size={18} /></Link>
                         </div>
                         <div className="wow-visual">

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { KeyRound, Mail, User, ArrowRight } from 'lucide-react';
+import { KeyRound, Mail, User, ArrowRight, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Logo from '../components/Logo';
 import './Auth.css';
@@ -12,12 +12,16 @@ const SignupPage = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isSlowServer, setIsSlowServer] = useState(false);
     const navigate = useNavigate();
 
     const handleSignup = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
+        setIsSlowServer(false);
+
+        const slowTimeout = setTimeout(() => setIsSlowServer(true), 4000);
 
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/signup`, {
@@ -34,9 +38,13 @@ const SignupPage = () => {
 
             window.dispatchEvent(new Event('user-auth-change'));
 
+            clearTimeout(slowTimeout);
+            setIsSlowServer(false);
             setIsLoading(false);
             navigate('/upload');
         } catch (err) {
+            clearTimeout(slowTimeout);
+            setIsSlowServer(false);
             setIsLoading(false);
             setError(err.message || t('auth.signup.error') || 'Signup failed. Please try again.');
         }
@@ -54,6 +62,13 @@ const SignupPage = () => {
                 </div>
 
                 {error && <div className="auth-error">{error}</div>}
+
+                {isSlowServer && (
+                    <div style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #bae6fd' }}>
+                        <Info size={20} className="flex-shrink-0" />
+                        <span>Our free server is waking up! This first request might take up to a minute. Thank you for your patience.</span>
+                    </div>
+                )}
 
                 <form className="auth-form" onSubmit={handleSignup}>
                     <div className="form-group">

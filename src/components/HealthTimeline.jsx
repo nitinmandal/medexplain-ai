@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, AlertTriangle, CheckCircle, Info, Loader2 } from 'lucide-react';
 import './HealthTimeline.css';
@@ -31,7 +31,7 @@ const HealthTimeline = ({ triggerUpdate }) => {
         if (metricsList.length > 0 && !selectedMetric) {
             setSelectedMetric(metricsList[0]);
         }
-    }, [triggerUpdate]);
+    }, [triggerUpdate, selectedMetric]);
 
     useEffect(() => {
         if (!selectedMetric || history.length === 0) return;

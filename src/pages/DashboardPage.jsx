@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Activity, AlertTriangle, CheckCircle, Info, Download, ArrowLeft, Loader2, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,9 +14,14 @@ const DashboardPage = () => {
     const navigate = useNavigate();
     const dataObj = location.state?.results || null;
     const reportId = location.state?.id || null;
-    const [triggerUpdate, setTriggerUpdate] = React.useState(0);
+    const [triggerUpdate, setTriggerUpdate] = useState(0);
 
-    let results = [];
+    const results = useMemo(() => {
+        if (Array.isArray(dataObj)) return dataObj;
+        if (dataObj && Array.isArray(dataObj.results)) return dataObj.results;
+        return [];
+    }, [dataObj]);
+
     let summary = null;
     let quickHighlights = null;
     let recommendations = null;
@@ -24,10 +29,7 @@ const DashboardPage = () => {
     let riskScore = null;
     let riskLevel = null;
 
-    if (Array.isArray(dataObj)) {
-        results = dataObj;
-    } else if (dataObj && Array.isArray(dataObj.results)) {
-        results = dataObj.results;
+    if (dataObj && !Array.isArray(dataObj)) {
         summary = dataObj.summary;
         quickHighlights = dataObj.quickHighlights;
         recommendations = dataObj.recommendations;
@@ -36,7 +38,7 @@ const DashboardPage = () => {
         riskLevel = dataObj.riskLevel;
     }
 
-    const [isExporting, setIsExporting] = React.useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const calculatePosition = (val, rangeStr, status) => {
         if (!rangeStr) return null;

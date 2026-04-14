@@ -1,4 +1,3 @@
-import React from 'react';
 import { Target, Users, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import './AboutPage.css';
@@ -18,7 +17,7 @@ const AboutPage = () => {
                     <Target className="mission-icon" />
                     <h2>{t('about.mission.title')}</h2>
                     <p className="mission-text">
-                        "{t('about.mission.text')}"
+                        &quot;{t('about.mission.text')}&quot;
                     </p>
                 </div>
 

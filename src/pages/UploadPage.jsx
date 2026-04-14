@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UploadCloud, File, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { UploadCloud, File, AlertCircle, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import './UploadPage.css';
 
@@ -10,8 +10,8 @@ const UploadPage = () => {
     const [error, setError] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [loadingStep, setLoadingStep] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [isSlowServer, setIsSlowServer] = useState(false);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
@@ -66,6 +66,9 @@ const UploadPage = () => {
         setIsAnalyzing(true);
         setError('');
         setUploadProgress(0);
+        setIsSlowServer(false);
+
+        const slowTimeout = setTimeout(() => setIsSlowServer(true), 4000);
 
         const progressInterval = setInterval(() => {
             setUploadProgress(prev => {
@@ -113,6 +116,8 @@ const UploadPage = () => {
             }
 
             clearInterval(progressInterval);
+            clearTimeout(slowTimeout);
+            setIsSlowServer(false);
             setUploadProgress(100);
 
             setTimeout(() => {
@@ -121,6 +126,8 @@ const UploadPage = () => {
             }, 600);
         } catch (err) {
             clearInterval(progressInterval);
+            clearTimeout(slowTimeout);
+            setIsSlowServer(false);
             setUploadProgress(0);
             setIsAnalyzing(false);
             setError(err.message || 'Error connecting to the AI server.');
@@ -262,6 +269,13 @@ const UploadPage = () => {
                         <div className="error-message animate-shake">
                             <AlertCircle size={16} />
                             <span>{error}</span>
+                        </div>
+                    )}
+
+                    {isSlowServer && !error && (
+                        <div style={{ backgroundColor: '#e0f2fe', color: '#0369a1', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #bae6fd' }}>
+                            <Info size={20} className="flex-shrink-0" />
+                            <span>Our free server is waking up! This initial analysis might take up to a minute. Thank you for your patience.</span>
                         </div>
                     )}
 

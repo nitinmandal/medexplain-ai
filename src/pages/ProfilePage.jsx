@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Calendar, Activity, ChevronRight, FileText } from 'lucide-react';
+import { Mail, Calendar, Activity, ChevronRight, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import './ProfilePage.css';
 
