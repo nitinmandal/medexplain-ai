@@ -51,4 +51,4 @@ By simply uploading a photo or PDF of a medical report, users receive an instant
 ---
 ## 📄 License
 This MVP codebase was created for educational open-source health-tech tooling.
-All data processed by the AI features is scrubbed locally immediately after analysis (`fs.unlinkSync()`) to preserve data privacy.
+All data processed by the AI features is scrubbed locally immediately after analysis (`fs.unlinkSync()`) to preserve data privacy .
